@@ -1,0 +1,33 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# Environment variables
+.env
+
+# macOS system files
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# Node.js (if you later add React frontend)
+node_modules/
+dist/
+build/
+
+# Coverage / testing
+.coverage
+htmlcov/
+.pytest_cache/
