@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Instagram Recipe Extractor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f9f9f9;
+      }
+      h1 {
+        color: #333;
+      }
+      input {
+        width: 400px;
+        padding: 10px;
+        margin-right: 10px;
+      }
+      button {
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+      .recipe {
+        margin-top: 30px;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .ingredients,
+      .steps {
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Instagram Recipe Extractor</h1>
+    <p>Paste an Instagram link below to extract the recipe:</p>
+
+    <input
+      type="text"
+      id="instaUrl"
+      placeholder="https://www.instagram.com/reel/xxxxxx/"
+    />
+    <button onclick="extractRecipe()">Extract Recipe</button>
+
+    <div id="output"></div>
+
+    <script>
+      async function extractRecipe() {
+        const url = document.getElementById("instaUrl").value;
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = "<p>Loading...</p>";
+
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:8000/extract_recipe?insta_url=${encodeURIComponent(
+              url
+            )}`
+          );
+          const data = await response.json();
+
+          if (data.error) {
+            outputDiv.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+            return;
+          }
+
+          if (data.recipe && data.recipe !== false) {
+            let recipe = data.recipe;
+
+            // If recipe is a string (from Ollama), try parsing JSON
+            if (typeof recipe === "string") {
+              try {
+                recipe = JSON.parse(recipe);
+              } catch (e) {
+                outputDiv.innerHTML = `<pre>${recipe}</pre>`;
+                return;
+              }
+            }
+
+            outputDiv.innerHTML = `
+              <div class="recipe">
+                <h2>${recipe.title || "Untitled Recipe"}</h2>
+                <div class="ingredients">
+                  <h3>Ingredients</h3>
+                  <ul>
+                    ${(recipe.ingredients || [])
+                      .map((ing) => `<li>${ing}</li>`)
+                      .join("")}
+                  </ul>
+                </div>
+                <div class="steps">
+                  <h3>Steps</h3>
+                  <ol>
+                    ${(recipe.steps || [])
+                      .map((step) => `<li>${step}</li>`)
+                      .join("")}
+                  </ol>
+                </div>
+              </div>
+            `;
+          } else {
+            outputDiv.innerHTML = "<p>No recipe found in this caption.</p>";
+          }
+        } catch (err) {
+          outputDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>
